@@ -44,20 +44,26 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          envs: PROJECT_ID,REGION,REPOSITORY,IMAGE_NAME
-          envs_format: export {{key}}={{value}}
-          script: |
-            export IMAGE_TAG=${{ github.sha }}
 
-            echo "Stopping old container..."
-            docker stop app || true
-            docker rm app || true
+        envs: PROJECT_ID,REGION,REPOSITORY,IMAGE_NAME
+        envs_format: |
+          export PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}";
+          export REGION="asia-southeast2";
+          export REPOSITORY="baca-app-be";
+          export IMAGE_NAME="baca-app-be";
 
-            echo "Pulling new image..."
-            docker pull $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+        script: |
+          IMAGE_TAG=${{ github.sha }}
 
-            echo "Running new container..."
-            docker run -d \
-              --name app \
-              -p 80:3000 \
-              $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+          echo "Stopping old container..."
+          docker stop app || true
+          docker rm app || true
+
+          echo "Pulling new image..."
+          docker pull $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+
+          echo "Running new container..."
+          docker run -d \
+            --name app \
+            -p 80:3000 \
+            $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
