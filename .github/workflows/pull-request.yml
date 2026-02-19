@@ -8,20 +8,48 @@ on:
 jobs:
   testing:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baca_db_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/baca_db_test?schema=public
+      JWT_ACCESS_SECRET: test-access-secret-key
+      JWT_REFRESH_SECRET: test-refresh-secret-key
+      NODE_ENV: test
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
-      - run: npm run test
 
-      name: testing
-      run: |
-        npm install
-        npm run test
-      
-      name: Try to build docker
-      run: |
-        docker build -t baca-be .
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Try to build docker
+        run: docker build -t baca-be .
