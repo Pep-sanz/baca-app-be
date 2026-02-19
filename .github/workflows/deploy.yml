@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
 
-          envs: PROJECT_ID,REGION,REPOSITORY,IMAGE_NAME
+          envs: IMAGE_TAG
           envs_format: |
             export PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}";
             export REGION="asia-southeast2";
@@ -53,17 +53,21 @@ jobs:
             export IMAGE_NAME="baca-app-be";
 
           script: |
-            IMAGE_TAG=${{ github.sha }}
+            echo ">>> ENV INSIDE VM:"
+            echo "PROJECT_ID=$PROJECT_ID"
+            echo "REGION=$REGION"
+            echo "REPOSITORY=$REPOSITORY"
+            echo "IMAGE_NAME=$IMAGE_NAME"
 
             echo "Stopping old container..."
             docker stop app || true
             docker rm app || true
 
             echo "Pulling new image..."
-            docker pull $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+            docker pull $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
 
             echo "Running new container..."
             docker run -d \
               --name app \
               -p 80:3000 \
-              $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+              $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
