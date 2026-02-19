@@ -1,7 +1,11 @@
+import { execSync } from "child_process";
 import prisma from "@/config/database";
 
 beforeAll(async () => {
-  // Clean database before tests
+  // Push schema to test database (creates tables if they don't exist)
+  execSync("npx prisma db push --skip-generate --accept-data-loss", {
+    stdio: "inherit",
+  });
   await prisma.$connect();
 });
 
