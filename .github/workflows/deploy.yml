@@ -64,4 +64,10 @@ jobs:
               --name app \
               -p 80:3000 \
               --restart always \
+              -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
+              -e JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }} \
+              -e JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
+              -e JWT_ACCESS_EXPIRES_IN=${{ secrets.JWT_ACCESS_EXPIRES_IN }} \
+              -e JWT_REFRESH_EXPIRES_IN=${{ secrets.JWT_REFRESH_EXPIRES_IN }} \
+              -e ENABLE_SWAGGER=${{ secrets.ENABLE_SWAGGER }} \
               $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
