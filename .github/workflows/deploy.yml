@@ -5,17 +5,17 @@ on:
     branches:
       - main
 
-env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: asia-southeast2
-  REPOSITORY: baca-app-be
-  IMAGE_NAME: baca-app-be
-  VM_HOST: ${{ secrets.VM_HOST }}
-  VM_USER: ${{ secrets.VM_USER }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      REGION: asia-southeast2
+      REPOSITORY: baca-app-be
+      IMAGE_NAME: baca-app-be
+      VM_HOST: ${{ secrets.VM_HOST }}
+      VM_USER: ${{ secrets.VM_USER }}
 
     steps:
       - name: Checkout
@@ -44,14 +44,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-
-          envs: IMAGE_TAG
-          envs_format: |
-            export PROJECT_ID="${{ secrets.GCP_PROJECT_ID }}";
-            export REGION="asia-southeast2";
-            export REPOSITORY="baca-app-be";
-            export IMAGE_NAME="baca-app-be";
-
+          envs: PROJECT_ID,REGION,REPOSITORY,IMAGE_NAME
           script: |
             echo ">>> ENV INSIDE VM:"
             echo "PROJECT_ID=$PROJECT_ID"
